@@ -51,3 +51,34 @@
 
 ### ผลการรัน
 - รัน `npm run test:unit` แล้วผ่าน 6/6 test cases
+
+---
+
+## Lab 02 — Arrange–Act–Assert และ Unit Test
+
+**Branch:** `pornpimol/lab/02-aaa-unit`
+
+### สิ่งที่ทำ
+
+- วิเคราะห์ `lab02-smelly.test.ts` และพบ Test Smells ได้แก่ Obscure Test, Eager Test, Assertion Roulette, Conditional Test Logic และ test ที่ไม่มี assertion
+- ทดลองแก้ `hashPassword()` ให้คืน plain text เพื่อยืนยันว่า test เดิมรายงานข้อผิดพลาดได้ไม่ชัดเจน แล้วแก้โค้ดกลับให้ถูกต้อง
+- ลบ `lab02-smelly.test.ts` ตามโจทย์ แล้วแยก test เป็นไฟล์ที่ตั้งชื่อตามสิ่งที่ทดสอบ
+- ปรับ `thaiNationalId.test.ts` ให้ใช้ `it.each` สำหรับกรณีข้อมูลหลายชุด
+- เพิ่ม `passwords.test.ts` เพื่อทดสอบการ hash, salt, การตรวจรหัสผ่านถูก/ผิด และ malformed hash
+- เพิ่ม `config.test.ts` เพื่อทดสอบค่า default และการอ่านค่า `PORT`, `DATABASE_URL`, `JWT_SECRET`
+- เพิ่ม Stretch test ใน `accountService.test.ts` เพื่อตรวจว่า `toPublicUser()` ไม่ส่ง `passwordHash` ออกไป
+
+### แนวคิดที่ได้เรียนรู้
+
+- **Arrange–Act–Assert (AAA)** แบ่ง test เป็นส่วนเตรียมข้อมูล, เรียกพฤติกรรมที่ต้องการทดสอบ, และตรวจผลลัพธ์ ทำให้ test อ่านและแก้ไขง่าย
+- **1 test = 1 behavior** และชื่อ test ควรบอกพฤติกรรมที่ระบบต้องทำ ไม่ใช้ชื่อกว้าง ๆ เช่น `works`
+- `it.each` ใช้แทน `for` loop เพื่อให้แต่ละชุดข้อมูลเป็น test แยกกัน และระบุกรณีที่ล้มเหลวได้ชัดเจน
+- การส่ง `env` เข้า `loadConfig(env)` เป็น parameter ทำให้ test เป็นอิสระ ไม่ต้องแก้ `process.env` ที่เป็น global state
+- Test ที่ดีช่วยให้ข้อความ error บอกสาเหตุได้ทันที เช่น password ผิด, hash ผิดรูปแบบ หรือเลขบัตรไม่ถูกต้อง
+
+### ผลการรัน
+
+```bash
+Test Suites: 4 passed, 4 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
