@@ -7,7 +7,7 @@
 | Branch | หัวข้อ | สถานะ |
 | --- | --- | --- |
 | `pornpimol/lab/00-setup` | ตรวจความพร้อมและทดลองรัน Automated Tests | เสร็จแล้ว |
-| `pornpimol/lab/01-boundaries` | Boundary Test Cases | กำลังทำ |
+| `pornpimol/lab/01-boundaries` | Boundary Test Cases | เสร็จแล้ว |
 | `pornpimol/lab/02-aaa-unit` | Arrange–Act–Assert และ Unit Test | ยังไม่เริ่ม |
 | `pornpimol/lab/03-test-doubles` | Dummy, Stub, Spy, Mock และ Fake | ยังไม่เริ่ม |
 | `pornpimol/lab/04-test-data` | Test Data, Database Isolation, Builder และ Faker | ยังไม่เริ่ม |
@@ -48,3 +48,6 @@
 ### ผลที่คาดหวัง
 - เมื่อรัน `npm run test:unit` ทุก test ต้องผ่าน
 - หาก validation ถูกแก้ให้ยอมรับหรือปฏิเสธจำนวนหลักผิด Boundary Test จะล้มเหลวเพื่อแจ้งปัญหา
+
+### ผลการรัน
+- รัน `npm run test:unit` แล้วผ่าน 6/6 test cases
