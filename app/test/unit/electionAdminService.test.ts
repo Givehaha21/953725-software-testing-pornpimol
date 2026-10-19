@@ -69,4 +69,34 @@ describe('ElectionAdminService.addCandidate', () => {
         // Assert
         await expect(result).rejects.toThrow(ConflictError);
     });
+    it('rejects a second candidate from the same party in the district', async () => {
+        // Arrange — พรรคตัวอย่างมีผู้สมัครในเขต CM-1 อยู่แล้ว
+        const partyData = [{ id: 1, name: 'พรรคตัวอย่าง', logoUrl: null, policy: 'นโยบายตัวอย่าง' }];
+        const districts = new InMemoryDistrictRepository([{ id: 'CM-1', province: 'เชียงใหม่', number: 1 }]);
+        const parties = new InMemoryPartyRepository(partyData);
+        const candidates = new InMemoryCandidateRepository(partyData, [
+            {
+                id: 1,
+                districtId: 'CM-1',
+                partyId: 1,
+                partyName: 'พรรคตัวอย่าง',
+                number: 1,
+                firstName: 'ผู้สมัครเดิม',
+                lastName: 'ใจดี',
+                photoUrl: null,
+            },
+        ]);
+        const service = new ElectionAdminService(parties, candidates, districts);
+
+        // Act — พรรคเดิมพยายามส่งผู้สมัครคนที่สอง แม้ใช้หมายเลขอื่น
+        const result = service.addCandidate('CM-1', {
+            partyId: 1,
+            number: 2,
+            firstName: 'ผู้สมัครคนที่สอง',
+            lastName: 'สุขใจ',
+        });
+
+        // Assert
+        await expect(result).rejects.toThrow(ConflictError);
+    });
 });
