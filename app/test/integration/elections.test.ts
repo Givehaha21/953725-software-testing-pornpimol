@@ -2,7 +2,7 @@ import request from 'supertest';
 import { Pool } from 'pg';
 import { createApp, pgDeps } from '../../src/app';
 import { JwtTokenService } from '../../src/auth/tokenService';
-import { aCommissioner, aParty } from '../support/builders';
+import { aCommissioner, aParty, aVoter } from '../support/builders';
 import { given } from './support/given';
 import { createTestPool, truncateAll } from './support/database';
 
@@ -45,6 +45,21 @@ describe('election management (component)', () => {
                 logoUrl: null,
             });
             expect(response.body.id).toEqual(expect.any(Number));
+        });
+        it('forbids a voter from creating a party', async () => {
+            // Arrange
+            const data = given(pool);
+            const voter = await data.user(aVoter().inDistrict('CM-1').build());
+            const party = aParty().named('พรรคที่ Voter สร้างไม่ได้').build();
+
+            // Act
+            const response = await request(app)
+                .post('/parties')
+                .set('Authorization', data.authHeader(voter))
+                .send(party);
+
+            // Assert
+            expect(response.status).toBe(403);
         });
     });
 });
