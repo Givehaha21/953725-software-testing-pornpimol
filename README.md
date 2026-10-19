@@ -1,62 +1,83 @@
-# Software Testing in Real Industry
+---
+---
 
-**Hands-on automated testing workshop & readiness checklist**
+## งานส่วนที่ 1: Software Testing Workshop
 
-Workshop 2 วัน · CMU CAMT · ส.–อา. 3–4 ตุลาคม 2026 · 09:00–16:30
+ได้ทำ Workshop การทดสอบซอฟต์แวร์ตั้งแต่ Lab 00 ถึง Lab 04 โดยประยุกต์ใช้กับระบบ Election App
 
-ฝึกเขียน automated test แบบที่ทีมจริงใช้ บน **ระบบเลือกตั้ง** ฉบับย่อ (Express + TypeScript + PostgreSQL + Liquibase)
-ตั้งแต่ unit test ไปจนถึง CI, outside-in และการเอา legacy code เข้า test — แล้วนำไปใช้กับโปรเจกต์ของตัวเอง
+### หัวข้อที่ทำ
 
-## เริ่มที่นี่
+- **Lab 00 — Setup:** ตรวจสอบความพร้อมของเครื่องและทดลองรัน Unit Test, Integration Test และ E2E Test
+- **Lab 01 — Boundary Test Cases:** ทดสอบเลขบัตรประชาชนไทยด้วย Boundary Value Analysis เช่น 12, 13 และ 14 หลัก
+- **Lab 02 — Arrange–Act–Assert:** ปรับ Unit Test ให้มีโครงสร้าง AAA ชัดเจน และทดสอบ password, config และข้อมูลผู้ใช้
+- **Lab 03 — Test Doubles:** ใช้ Dummy, Stub, Spy, Mock, Fake และ Fake Timers ใน Unit Test
+- **Lab 04 — Test Data Management:** ใช้ Test Data Builder, Faker, Fresh Fixture, Database Isolation และ Component Test กับ PostgreSQL จริง
 
-1. **ก่อนมา workshop** — ทำตาม [setup/README.md](setup/README.md) จน `npm run doctor` ขึ้น ✅ READY
-   แล้วส่ง screenshot + test cases ภายใน **พฤ. 1 ต.ค. 2026**
-2. **ระหว่าง workshop** — รายการ lab และวิธีสลับ branch อยู่ที่ [labs/README.md](labs/README.md)
-3. **ประเมินโปรเจกต์ตัวเอง** — [checklist/README.md](checklist/README.md) (รอบ 1 เช้า Day 1 · รอบ 2 ท้าย Day 2)
+### ผลลัพธ์ที่ได้
 
-## Branches
+- เพิ่ม Unit Test สำหรับ validation, password, token, account service และ election management
+- เพิ่ม Component Test สำหรับสมัครสมาชิก, จัดการพรรค, สร้างผู้สมัคร, เปลี่ยนบทบาทผู้ใช้ และแสดงผู้สมัครตามเขต
+- ใช้ Liquibase และ Docker Compose จัดการฐานข้อมูลสำหรับ development และ test
+- แยกข้อมูลทดสอบของแต่ละ test เพื่อป้องกัน test รบกวนกันเอง
+- สร้าง seed data สำหรับ Commissioner ด้วย Faker และ Liquibase
 
-```text
-main                      ระบบอ้างอิง + test infra + CI (+ slides, facilitator guide)
-jest/lab/NN-name          จุดเริ่มต้นของ lab NN — โจทย์อยู่ที่ labs/NN-name/README.md
-jest/solution/NN-name     เฉลย lab NN = จุดเริ่มต้นของ lab NN+1
-demo/testcontainers       demo: integration test บน Testcontainers
-demo/playwright-browser   demo: Playwright ผ่าน browser
-```
+รายละเอียดการทำ Workshop อยู่ในไฟล์ [workshop_log.md](workshop_log.md)
 
-ตามไม่ทันไม่เป็นไร — ทุก lab เริ่มจากเฉลยของ lab ก่อนหน้า:
 
-```bash
-git stash -u                         # เก็บงานตัวเอง (-u = รวมไฟล์ใหม่ด้วย)
-git switch jest/lab/06-outside-in    # ไป lab ถัดไปได้ทันที
-```
+## งานส่งส่วนที่ 2: Election App Unit Testing
 
-## โครงสร้าง repo
+งานนี้ออกแบบและพัฒนา Unit Test สำหรับ Feature ECT-F03 การเปิด–ปิดสถานะการเลือกตั้ง โดยอ้างอิง Test Case TC-ECT-F03-07 ถึง TC-ECT-F03-16
 
-| | |
-|---|---|
-| [`app/`](app/) | ระบบเลือกตั้ง + test ทั้งหมด (`test/unit`, `test/integration`, `e2e/`) และ Liquibase changelog (`db/`) — รายละเอียดใน [app/README.md](app/README.md) |
-| [`labs/`](labs/) | โจทย์ของแต่ละ lab |
-| [`checklist/`](checklist/) | Readiness Checklist สำหรับโปรเจกต์ของตัวเอง |
-| [`setup/`](setup/) | สิ่งที่ต้องทำก่อนมา workshop |
-| `.github/workflows/ci.yml` · `.gitlab-ci.yml` · `Jenkinsfile` | pipeline เดียวกันบน 3 CI |
-| `slides/` · `facilitator/` | สไลด์ (Marp) และคู่มือผู้สอน — อยู่บน `main` เท่านั้น |
+### การติดตั้งและรันงาน
 
-## คำสั่งที่ใช้บ่อย
-
-รันในโฟลเดอร์ `app/` (ต้องเปิด Docker ไว้ ยกเว้น `test:unit`)
+1. ติดตั้ง Node.js และเปิด Docker Desktop
+2. Clone repository และเปลี่ยนไปยัง branch งานส่ง
 
 ```bash
-npm run doctor            # ตรวจความพร้อมของเครื่อง
-npm run test:unit         # unit test — ไม่มี I/O
-npm run test:integration  # เปิด test DB (port 5433) + migrate แล้วรัน component test
-npm run test:e2e          # build app container แล้วรัน Playwright API test
-npm run db:reset:test     # สร้าง test DB ใหม่ทั้งก้อน
+git clone https://github.com/Givehaha21/953725-software-testing-pornpimol.git
+cd 953725-software-testing-pornpimol
+git switch pornpimol/part-2-election-unit-tests
+cd app
+npm ci
 ```
 
-## Workshop นี้อิงจาก
+3. ตรวจสอบ TypeScript และรัน Unit Test
 
-- Toby Clemson — [*Testing Strategies in a Microservice Architecture*](https://martinfowler.com/articles/microservice-testing/) (martinfowler.com)
-- Gerard Meszaros — *xUnit Test Patterns: Refactoring Test Code*
-- Steve Freeman & Nat Pryce — *Growing Object-Oriented Software, Guided by Tests*
-- Michael Feathers — *Working Effectively with Legacy Code*
+```bash
+npx tsc --noEmit
+npm run test:unit
+```
+
+4. รัน Integration Test กับ PostgreSQL
+
+```bash
+npm run test:integration
+```
+
+หากต้องการตรวจ resource ที่อาจค้างหลังจบ Integration Test ให้ใช้:
+
+```bash
+npx jest --selectProjects integration --runInBand --detectOpenHandles
+```
+
+### ผลการทดสอบ
+
+- Unit Test: 8 test suites / 42 tests ผ่าน
+- Integration Test: 2 test suites / 8 tests ผ่าน
+- ตรวจ TypeScript และ open handles ผ่าน
+
+### แนวคิดการทดสอบที่นำมาใช้
+
+- **Arrange–Act–Assert (AAA):** จัดโครงสร้าง test เป็นการเตรียมข้อมูล เรียกใช้งาน และตรวจผลลัพธ์
+- **Happy Path และ Alternative/Failure Path:** ทดสอบทั้งกรณีทำงานสำเร็จและกรณีข้อมูลหรือเงื่อนไขไม่ถูกต้อง
+- **Stub:** ควบคุมผลลัพธ์ของ dependency เพื่อทดสอบเฉพาะกติกาที่ต้องการ
+- **Spy:** ตรวจสอบการเรียกใช้งานและข้อมูลที่ส่งไปยัง dependency
+- **Mock:** จำลอง dependency และตรวจพฤติกรรมที่คาดหวัง
+- **Faker:** สร้างข้อมูลทดสอบแบบ dynamic โดยไม่ใช้ข้อมูลจริง
+- **Test Isolation:** Unit Test ไม่เชื่อมต่อฐานข้อมูลหรือ Express และแต่ละ test ไม่แชร์ state กัน
+
+### เอกสารประกอบ
+
+- [Unit Test Design สำหรับ ECT-F03](app/docs/part-2-ect-f03-unit-test-design.md)
+- [เปรียบเทียบโค้ดเดิมและโค้ดที่ปรับปรุง](app/docs/part-2-code-comparison.md)
+- Unit Test หลัก: [electionStatusService.test.ts](app/test/unit/electionStatusService.test.ts)
