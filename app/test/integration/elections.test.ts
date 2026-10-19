@@ -1,10 +1,10 @@
-import request from 'supertest';
 import { Pool } from 'pg';
+import request from 'supertest';
 import { createApp, pgDeps } from '../../src/app';
 import { JwtTokenService } from '../../src/auth/tokenService';
-import { aCommissioner, aParty, aVoter } from '../support/builders';
-import { given } from './support/given';
+import { aCandidate, aCommissioner, aParty, aVoter } from '../support/builders';
 import { createTestPool, truncateAll } from './support/database';
+import { given } from './support/given';
 
 describe('election management (component)', () => {
     let pool: Pool;
@@ -46,6 +46,7 @@ describe('election management (component)', () => {
             });
             expect(response.body.id).toEqual(expect.any(Number));
         });
+
         it('forbids a voter from creating a party', async () => {
             // Arrange
             const data = given(pool);
@@ -61,6 +62,7 @@ describe('election management (component)', () => {
             // Assert
             expect(response.status).toBe(403);
         });
+
         it('requires a token to create a party', async () => {
             // Arrange
             const party = aParty().named('พรรคไม่มี Token').build();
@@ -71,6 +73,7 @@ describe('election management (component)', () => {
             // Assert
             expect(response.status).toBe(401);
         });
+
         it('rejects a duplicate party name', async () => {
             // Arrange
             const data = given(pool);
@@ -86,6 +89,38 @@ describe('election management (component)', () => {
 
             // Assert
             expect(response.status).toBe(409);
+        });
+    });
+
+    describe('POST /districts/:id/candidates', () => {
+        it('adds a candidate that then appears in the public results of that district', async () => {
+            // Arrange
+            const data = given(pool);
+            const commissioner = await data.user(aCommissioner().inDistrict('CM-1').build());
+            const party = await data.party(aParty().named('พรรคผู้สมัคร').build());
+            const candidateInput = aCandidate().inDistrict('CM-1').forParty(party.id).numbered(1).build();
+
+            // Act
+            const created = await request(app)
+                .post('/districts/CM-1/candidates')
+                .set('Authorization', data.authHeader(commissioner))
+                .send(candidateInput);
+
+            const results = await request(app).get('/districts/CM-1/results');
+
+            // Assert
+            expect(created.status).toBe(201);
+            expect(results.status).toBe(200);
+            expect(results.body).toMatchObject({
+                district: { id: 'CM-1' },
+                closed: false,
+            });
+            expect(results.body.candidates).toContainEqual({
+                number: 1,
+                firstName: candidateInput.firstName,
+                lastName: candidateInput.lastName,
+                partyName: 'พรรคผู้สมัคร',
+            });
         });
     });
 });
