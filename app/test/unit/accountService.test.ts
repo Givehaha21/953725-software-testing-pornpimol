@@ -401,4 +401,49 @@ describe('AccountService', () => {
             expect(issue).not.toHaveBeenCalled();
         });
     });
+    describe('changeRole', () => {
+        it('refuses to make anyone an ADMIN', async () => {
+            // Arrange
+            // Mock: ตรวจว่า updateRole() ต้องไม่ถูกเรียกเมื่อ role ไม่อนุญาต
+            const updateRole = jest.fn();
+
+            const users: UserRepository = {
+                findById: async () => null,
+                findByNationalId: async () => null,
+                create: async () => {
+                    throw new Error('create should not be called');
+                },
+                updateRole,
+            };
+
+            const districts: DistrictRepository = {
+                // Dummy: changeRole() ไม่ควรใช้ district repository
+                findAll: async () => {
+                    throw new Error('dummy should not be used');
+                },
+                findById: async () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            const tokens: TokenService = {
+                // Dummy: changeRole() ไม่ควรใช้ token service
+                issue: () => {
+                    throw new Error('dummy should not be used');
+                },
+                verify: () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            // Act
+            const result = service.changeRole(1, 'ADMIN');
+
+            // Assert
+            await expect(result).rejects.toThrow(ValidationError);
+            expect(updateRole).not.toHaveBeenCalled();
+        });
+    });
 });
