@@ -52,6 +52,7 @@
 ### ผลการรัน
 - รัน `npm run test:unit` แล้วผ่าน 6/6 test cases
 
+
 ---
 
 ## Lab 02 — Arrange–Act–Assert และ Unit Test
@@ -77,8 +78,15 @@
 - Test ที่ดีช่วยให้ข้อความ error บอกสาเหตุได้ทันที เช่น password ผิด, hash ผิดรูปแบบ หรือเลขบัตรไม่ถูกต้อง
 
 ### ผลการรัน
-
+npm run test:unit
+npx jest --selectProjects unit --verbose
 ```bash
 Test Suites: 4 passed, 4 total
 Tests:       14 passed, 14 total
 Snapshots:   0 total
+
+ชุดทดสอบที่ผ่าน:
+- thaiNationalId.test.ts — ตรวจ checksum, ความยาว และรูปแบบเลขบัตร
+- passwords.test.ts — ตรวจ hash, salt และการ verify password
+- config.test.ts — ตรวจ default configuration และ environment configuration
+- accountService.test.ts — ตรวจว่าไม่เปิดเผย passwordHash
