@@ -3,7 +3,7 @@ import { TokenService } from '../../src/auth/tokenService';
 import { Role, User } from '../../src/domain/types';
 import { DistrictRepository } from '../../src/repositories/districtRepository';
 import { NewUser, UserRepository } from '../../src/repositories/userRepository';
-import { ConflictError, ValidationError } from '../../src/errors';
+import { ConflictError, UnauthorizedError, ValidationError } from '../../src/errors';
 import { hashPassword } from '../../src/auth/passwords';
 
 class InMemoryUserRepository implements UserRepository {
@@ -351,6 +351,54 @@ describe('AccountService', () => {
                 role: 'VOTER',
                 districtId: 'CM-1',
             });
+        });
+        it('rejects a wrong password without issuing a token', async () => {
+            // Arrange
+            const user: User = {
+                id: 1,
+                nationalId: '1509900000017',
+                passwordHash: hashPassword('voter1234'),
+                firstName: 'Pornpimol',
+                lastName: 'Sukjai',
+                address: 'เชียงใหม่',
+                districtId: 'CM-1',
+                role: 'VOTER',
+            };
+
+            const users: UserRepository = {
+                findById: async () => null,
+                findByNationalId: async () => user,
+                create: async () => {
+                    throw new Error('create should not be called');
+                },
+                updateRole: async () => null,
+            };
+
+            const districts: DistrictRepository = {
+                // Dummy: login() ไม่ควรใช้ district repository
+                findAll: async () => {
+                    throw new Error('dummy should not be used');
+                },
+                findById: async () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            // Mock: ตรวจว่า issue() ต้องไม่ถูกเรียกเมื่อรหัสผ่านผิด
+            const issue = jest.fn().mockReturnValue('test-token');
+            const tokens: TokenService = {
+                issue,
+                verify: () => null,
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            // Act
+            const result = service.login('1509900000017', 'wrong-password');
+
+            // Assert
+            await expect(result).rejects.toThrow(UnauthorizedError);
+            expect(issue).not.toHaveBeenCalled();
         });
     });
 });
