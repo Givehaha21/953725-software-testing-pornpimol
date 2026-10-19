@@ -144,4 +144,40 @@ describe('election management (component)', () => {
             expect(response.body).not.toHaveProperty('passwordHash');
         });
     });
+    describe('GET /me/candidates', () => {
+        it('shows a voter only the candidates of their own district', async () => {
+            // Arrange
+            const data = given(pool);
+            const voter = await data.user(aVoter().inDistrict('CM-1').build());
+
+            const partyInDistrict = await data.party(aParty().named('พรรคเขตหนึ่ง').build());
+            const partyOtherDistrict = await data.party(aParty().named('พรรคเขตสอง').build());
+
+            const candidateInDistrict = await data.candidate(
+                aCandidate().inDistrict('CM-1').forParty(partyInDistrict.id).numbered(1).build(),
+            );
+            const candidateOtherDistrict = await data.candidate(
+                aCandidate().inDistrict('CM-2').forParty(partyOtherDistrict.id).numbered(1).build(),
+            );
+
+            // Act
+            const response = await request(app)
+                .get('/me/candidates')
+                .set('Authorization', data.authHeader(voter));
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual([
+                expect.objectContaining({
+                    id: candidateInDistrict.id,
+                    number: 1,
+                    party: 'พรรคเขตหนึ่ง',
+                    selected: false,
+                }),
+            ]);
+            expect(response.body).not.toEqual(
+                expect.arrayContaining([expect.objectContaining({ id: candidateOtherDistrict.id })]),
+            );
+        });
+    });
 });
