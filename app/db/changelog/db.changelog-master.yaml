@@ -16,12 +16,7 @@ databaseChangeLog:
 
   # Marker: the Day 1 schema is complete. `update-to-tag --tag=day1` stops here,
   # before any seed data.
-  - changeSet:
-      id: tag-day1
-      author: election
-      changes:
-        - tagDatabase:
-            tag: day1
+#   
 
   
 
