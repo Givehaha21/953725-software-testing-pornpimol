@@ -71,5 +71,21 @@ describe('election management (component)', () => {
             // Assert
             expect(response.status).toBe(401);
         });
+        it('rejects a duplicate party name', async () => {
+            // Arrange
+            const data = given(pool);
+            const commissioner = await data.user(aCommissioner().inDistrict('CM-1').build());
+            const existingParty = aParty().named('พรรคชื่อซ้ำ').build();
+            await data.party(existingParty);
+
+            // Act
+            const response = await request(app)
+                .post('/parties')
+                .set('Authorization', data.authHeader(commissioner))
+                .send(aParty().named('พรรคชื่อซ้ำ').build());
+
+            // Assert
+            expect(response.status).toBe(409);
+        });
     });
 });
