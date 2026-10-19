@@ -1,4 +1,4 @@
-import { ConflictError } from '../../src/errors';
+import { ConflictError, ValidationError } from '../../src/errors';
 import { ElectionAdminService } from '../../src/services/electionAdminService';
 import {
     InMemoryCandidateRepository,
@@ -139,5 +139,24 @@ describe('ElectionAdminService.addCandidate', () => {
             number: 1,
             partyName: 'พรรคใหม่',
         });
+    });
+    it('rejects an unknown party', async () => {
+        // Arrange — เขตมีอยู่จริง แต่ไม่มีพรรค id 99
+        const partyData = [{ id: 1, name: 'พรรคตัวอย่าง', logoUrl: null, policy: 'นโยบายตัวอย่าง' }];
+        const districts = new InMemoryDistrictRepository([{ id: 'CM-1', province: 'เชียงใหม่', number: 1 }]);
+        const parties = new InMemoryPartyRepository(partyData);
+        const candidates = new InMemoryCandidateRepository(partyData);
+        const service = new ElectionAdminService(parties, candidates, districts);
+
+        // Act
+        const result = service.addCandidate('CM-1', {
+            partyId: 99,
+            number: 1,
+            firstName: 'ผู้สมัคร',
+            lastName: 'ไม่พบพรรค',
+        });
+
+        // Assert
+        await expect(result).rejects.toThrow(ValidationError);
     });
 });
