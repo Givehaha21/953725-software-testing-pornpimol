@@ -99,4 +99,45 @@ describe('ElectionAdminService.addCandidate', () => {
         // Assert
         await expect(result).rejects.toThrow(ConflictError);
     });
+    it('allows the same number in a different district', async () => {
+        // Arrange — เขต CM-1 มีหมายเลข 1 แล้ว แต่ CM-2 ยังไม่มี
+        const partyData = [
+            { id: 1, name: 'พรรคตัวอย่าง', logoUrl: null, policy: 'นโยบายตัวอย่าง' },
+            { id: 2, name: 'พรรคใหม่', logoUrl: null, policy: 'นโยบายใหม่' },
+        ];
+        const districts = new InMemoryDistrictRepository([
+            { id: 'CM-1', province: 'เชียงใหม่', number: 1 },
+            { id: 'CM-2', province: 'เชียงใหม่', number: 2 },
+        ]);
+        const parties = new InMemoryPartyRepository(partyData);
+        const candidates = new InMemoryCandidateRepository(partyData, [
+            {
+                id: 1,
+                districtId: 'CM-1',
+                partyId: 1,
+                partyName: 'พรรคตัวอย่าง',
+                number: 1,
+                firstName: 'ผู้สมัครเขตหนึ่ง',
+                lastName: 'ใจดี',
+                photoUrl: null,
+            },
+        ]);
+        const service = new ElectionAdminService(parties, candidates, districts);
+
+        // Act
+        const candidate = await service.addCandidate('CM-2', {
+            partyId: 2,
+            number: 1,
+            firstName: 'ผู้สมัครเขตสอง',
+            lastName: 'สุขใจ',
+        });
+
+        // Assert
+        expect(candidate).toMatchObject({
+            districtId: 'CM-2',
+            partyId: 2,
+            number: 1,
+            partyName: 'พรรคใหม่',
+        });
+    });
 });
