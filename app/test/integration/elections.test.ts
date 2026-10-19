@@ -61,5 +61,15 @@ describe('election management (component)', () => {
             // Assert
             expect(response.status).toBe(403);
         });
+        it('requires a token to create a party', async () => {
+            // Arrange
+            const party = aParty().named('พรรคไม่มี Token').build();
+
+            // Act
+            const response = await request(app).post('/parties').send(party);
+
+            // Assert
+            expect(response.status).toBe(401);
+        });
     });
 });
