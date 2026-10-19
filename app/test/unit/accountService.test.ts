@@ -3,7 +3,7 @@ import { TokenService } from '../../src/auth/tokenService';
 import { Role, User } from '../../src/domain/types';
 import { DistrictRepository } from '../../src/repositories/districtRepository';
 import { NewUser, UserRepository } from '../../src/repositories/userRepository';
-import { ConflictError } from '../../src/errors';
+import { ConflictError, ValidationError } from '../../src/errors';
 
 class InMemoryUserRepository implements UserRepository {
     constructor(private readonly users: User[] = []) { }
@@ -203,6 +203,55 @@ describe('AccountService', () => {
 
             // Assert
             await expect(result).rejects.toThrow(ConflictError);
+        });
+        it('does not save anything when the national id is invalid', async () => {
+            // Arrange
+            const registration: Registration = {
+                nationalId: '1509900000018',
+                password: 'voter1234',
+                firstName: 'Pornpimol',
+                lastName: 'Sukjai',
+                address: 'เชียงใหม่',
+                districtId: 'CM-1',
+            };
+
+            // Mock: ตั้ง expectation ว่า create() ต้องไม่ถูกเรียก
+            const create = jest.fn(async (_newUser: NewUser): Promise<User> => {
+                throw new Error('create should not be called');
+            });
+
+            const users: UserRepository = {
+                findById: async () => null,
+                findByNationalId: async () => null,
+                create,
+                updateRole: async () => null,
+            };
+
+            const districts: DistrictRepository = {
+                findAll: async () => [],
+                findById: async () => {
+                    throw new Error('district should not be checked');
+                },
+            };
+
+            const tokens: TokenService = {
+                // Dummy: invalid national ID ต้องถูกปฏิเสธก่อนใช้ token
+                issue: () => {
+                    throw new Error('dummy should not be used');
+                },
+                verify: () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            // Act
+            const result = service.register(registration);
+
+            // Assert
+            await expect(result).rejects.toThrow(ValidationError);
+            expect(create).not.toHaveBeenCalled();
         });
     });
 });
