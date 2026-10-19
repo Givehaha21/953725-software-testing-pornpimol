@@ -1,8 +1,35 @@
 import { AccountService, Registration, toPublicUser } from '../../src/services/accountService';
 import { TokenService } from '../../src/auth/tokenService';
-import { User } from '../../src/domain/types';
+import { Role, User } from '../../src/domain/types';
 import { DistrictRepository } from '../../src/repositories/districtRepository';
 import { NewUser, UserRepository } from '../../src/repositories/userRepository';
+import { ConflictError } from '../../src/errors';
+
+class InMemoryUserRepository implements UserRepository {
+    constructor(private readonly users: User[] = []) { }
+
+    async findById(id: number): Promise<User | null> {
+        return this.users.find((user) => user.id === id) ?? null;
+    }
+
+    async findByNationalId(nationalId: string): Promise<User | null> {
+        return this.users.find((user) => user.nationalId === nationalId) ?? null;
+    }
+
+    async create(newUser: NewUser): Promise<User> {
+        const nextId = Math.max(0, ...this.users.map((user) => user.id)) + 1;
+        const user: User = { id: nextId, ...newUser, role: 'VOTER' };
+        this.users.push(user);
+        return user;
+    }
+
+    async updateRole(id: number, role: Role): Promise<User | null> {
+        const user = await this.findById(id);
+        if (!user) return null;
+        user.role = role;
+        return user;
+    }
+}
 
 describe('toPublicUser', () => {
     it('returns user data without exposing the password hash', () => {
@@ -127,6 +154,55 @@ describe('AccountService', () => {
             // Assert
             expect(create).toHaveBeenCalledTimes(1);
             expect(create.mock.calls[0][0].passwordHash).not.toBe(registration.password);
+        });
+
+        it('rejects a national id that is already registered', async () => {
+            // Arrange
+            const existingUser: User = {
+                id: 1,
+                nationalId: '1509900000017',
+                passwordHash: 'existing-password-hash',
+                firstName: 'Existing',
+                lastName: 'Voter',
+                address: 'เชียงใหม่',
+                districtId: 'CM-1',
+                role: 'VOTER',
+            };
+
+            // Fake: implementation จริงแบบง่าย เก็บข้อมูลใน array แทนฐานข้อมูล
+            const users = new InMemoryUserRepository([existingUser]);
+
+            const districts: DistrictRepository = {
+                findAll: async () => [],
+                findById: async () => ({ id: 'CM-1', province: 'เชียงใหม่', number: 1 }),
+            };
+
+            const tokens: TokenService = {
+                // Dummy: register() ไม่ควรเรียกใช้ token
+                issue: () => {
+                    throw new Error('dummy should not be used');
+                },
+                verify: () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            const registration: Registration = {
+                nationalId: '1509900000017',
+                password: 'voter1234',
+                firstName: 'Pornpimol',
+                lastName: 'Sukjai',
+                address: 'เชียงใหม่',
+                districtId: 'CM-1',
+            };
+
+            // Act
+            const result = service.register(registration);
+
+            // Assert
+            await expect(result).rejects.toThrow(ConflictError);
         });
     });
 });
