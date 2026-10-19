@@ -18,7 +18,9 @@ databaseChangeLog:
   # before any seed data.
 #   
 
-  
+  - include:
+    file: changes/005-practice.sql
+    relativeToChangelogFile: true 
 
   - include:
       file: changes/900-dev-seed.sql
