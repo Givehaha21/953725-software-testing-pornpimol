@@ -122,3 +122,13 @@ Snapshots:   0 total
 
 ```bash
 npm run test:unit
+
+## Lab 04 — Test Data Management
+
+- ศึกษา Liquibase migration, rollback, tag, checksum และ context (`dev` / `test` / `e2e`)
+- สร้าง Test Data Builders สำหรับ User, Party และ Candidate พร้อมกำหนด seed ของ Faker เพื่อให้ข้อมูลทดสอบสร้างซ้ำได้
+- ใช้ Fresh Fixture โดย `truncateAll()` ก่อนแต่ละ Component Test และสร้างข้อมูลผ่าน helper `given(pool)`
+- เพิ่ม Component Tests ครอบคลุมการจัดการพรรค การสร้างผู้สมัคร การเปลี่ยน role และการแสดงผู้สมัครเฉพาะเขตของผู้ลงคะแนน
+- ตรวจลำดับทดสอบแบบสุ่ม: Integration ผ่าน 2 suites / 8 tests
+- สร้าง `scripts/generate-user-seed.ts` เพื่อผลิต Liquibase dev seed สำหรับ Commissioner และตรวจ apply → rollback → apply สำเร็จ
+- ผลตรวจสุดท้าย: TypeScript ผ่าน, Unit 7 suites / 31 tests, Integration 2 suites / 8 tests
