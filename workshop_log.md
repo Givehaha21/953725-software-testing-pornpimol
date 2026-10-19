@@ -6,15 +6,15 @@
 
 | Branch | หัวข้อ | สถานะ |
 | --- | --- | --- |
-| `pornpimol/lab/00-setup` | ตรวจความพร้อมและทดลองรัน Automated Tests | เสร็จแล้ว |
-| `pornpimol/lab/01-boundaries` | Boundary Test Cases | เสร็จแล้ว |
-| `pornpimol/lab/02-aaa-unit` | Arrange–Act–Assert และ Unit Test | ยังไม่เริ่ม |
-| `pornpimol/lab/03-test-doubles` | Dummy, Stub, Spy, Mock และ Fake | ยังไม่เริ่ม |
-| `pornpimol/lab/04-test-data` | Test Data, Database Isolation, Builder และ Faker | ยังไม่เริ่ม |
+| `pornpimol/lab/00-setup` | ตรวจความพร้อมและทดลองรัน Automated Tests 
+| `pornpimol/lab/01-boundaries` | Boundary Test Cases 
+| `pornpimol/lab/02-aaa-unit` | Arrange–Act–Assert และ Unit Test
+| `pornpimol/lab/03-test-doubles` | Dummy, Stub, Spy, Mock และ Fake 
+| `pornpimol/lab/04-test-data` | Test Data, Database Isolation, Builder และ Faker 
 | `pornpimol/lab/05-ci` | Continuous Integration | ยังไม่เริ่ม |
-| `pornpimol/lab/06-outside-in` | Acceptance Test, Component Test และ Unit Test | ยังไม่เริ่ม |
-| `pornpimol/lab/07-legacy` | Characterization Test และการทดสอบ Legacy Code | ยังไม่เริ่ม |
-| `pornpimol/lab/08-own-project` | ประยุกต์ใช้กับ Election App ของตนเอง | ยังไม่เริ่ม |
+| `pornpimol/lab/06-outside-in` | Acceptance Test, Component Test และ Unit Test 
+| `pornpimol/lab/07-legacy` | Characterization Test และการทดสอบ Legacy Code 
+| `pornpimol/lab/08-own-project` | ประยุกต์ใช้กับ Election App ของตนเอง 
 
 ## Lab 00 — Setup
 
