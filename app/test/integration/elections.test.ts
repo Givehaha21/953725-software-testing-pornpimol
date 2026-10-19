@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import request from 'supertest';
 import { createApp, pgDeps } from '../../src/app';
 import { JwtTokenService } from '../../src/auth/tokenService';
-import { aCandidate, aCommissioner, aParty, aVoter } from '../support/builders';
+import { aCandidate, aCommissioner, aParty, aVoter, anAdmin } from '../support/builders';
 import { createTestPool, truncateAll } from './support/database';
 import { given } from './support/given';
 
@@ -16,7 +16,6 @@ describe('election management (component)', () => {
     });
 
     beforeEach(async () => {
-        // Fresh Fixture: ทุก test เริ่มจากข้อมูลว่าง
         await truncateAll(pool);
     });
 
@@ -105,7 +104,6 @@ describe('election management (component)', () => {
                 .post('/districts/CM-1/candidates')
                 .set('Authorization', data.authHeader(commissioner))
                 .send(candidateInput);
-
             const results = await request(app).get('/districts/CM-1/results');
 
             // Assert
@@ -121,6 +119,29 @@ describe('election management (component)', () => {
                 lastName: candidateInput.lastName,
                 partyName: 'พรรคผู้สมัคร',
             });
+        });
+    });
+
+    describe('PATCH /admin/users/:id/role', () => {
+        it('lets an admin promote a voter to commissioner', async () => {
+            // Arrange
+            const data = given(pool);
+            const admin = await data.user(anAdmin().inDistrict('CM-1').build());
+            const voter = await data.user(aVoter().inDistrict('CM-1').build());
+
+            // Act
+            const response = await request(app)
+                .patch(`/admin/users/${voter.id}/role`)
+                .set('Authorization', data.authHeader(admin))
+                .send({ role: 'COMMISSIONER' });
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toMatchObject({
+                id: voter.id,
+                role: 'COMMISSIONER',
+            });
+            expect(response.body).not.toHaveProperty('passwordHash');
         });
     });
 });
