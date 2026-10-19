@@ -4,6 +4,7 @@ import { Role, User } from '../../src/domain/types';
 import { DistrictRepository } from '../../src/repositories/districtRepository';
 import { NewUser, UserRepository } from '../../src/repositories/userRepository';
 import { ConflictError, ValidationError } from '../../src/errors';
+import { hashPassword } from '../../src/auth/passwords';
 
 class InMemoryUserRepository implements UserRepository {
     constructor(private readonly users: User[] = []) { }
@@ -296,6 +297,60 @@ describe('AccountService', () => {
 
             // Assert
             await expect(result).rejects.toThrow(ValidationError);
+        });
+    });
+    describe('login', () => {
+        it('issues a token for the user', async () => {
+            // Arrange
+            const user: User = {
+                id: 1,
+                nationalId: '1509900000017',
+                passwordHash: hashPassword('voter1234'),
+                firstName: 'Pornpimol',
+                lastName: 'Sukjai',
+                address: 'เชียงใหม่',
+                districtId: 'CM-1',
+                role: 'VOTER',
+            };
+
+            const users: UserRepository = {
+                findById: async () => null,
+                findByNationalId: async () => user,
+                create: async () => {
+                    throw new Error('create should not be called');
+                },
+                updateRole: async () => null,
+            };
+
+            const districts: DistrictRepository = {
+                // Dummy: login() ไม่ควรใช้ district repository
+                findAll: async () => {
+                    throw new Error('dummy should not be used');
+                },
+                findById: async () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            // Mock: กำหนด expectation ว่า issue() ต้องได้รับ principal ที่ถูกต้อง
+            const issue = jest.fn().mockReturnValue('test-token');
+            const tokens: TokenService = {
+                issue,
+                verify: () => null,
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            // Act
+            const token = await service.login('1509900000017', 'voter1234');
+
+            // Assert
+            expect(token).toBe('test-token');
+            expect(issue).toHaveBeenCalledWith({
+                userId: 1,
+                role: 'VOTER',
+                districtId: 'CM-1',
+            });
         });
     });
 });
