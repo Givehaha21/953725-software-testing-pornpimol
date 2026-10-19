@@ -14,12 +14,12 @@ databaseChangeLog:
       file: changes/004-election-votes.sql
       relativeToChangelogFile: true
 
-  - changeSet:
-      id: tag-lab04-start
-      author: election
-      changes:
-        - tagDatabase:
-            tag: lab04-start
+#   - changeSet:
+#       id: tag-lab04-start
+#       author: election
+#       changes:
+#         - tagDatabase:
+#             tag: lab04-start
 
   - include:
       file: changes/005-practice.sql
