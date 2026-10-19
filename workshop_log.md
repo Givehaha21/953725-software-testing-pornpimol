@@ -90,3 +90,35 @@ Snapshots:   0 total
 - passwords.test.ts — ตรวจ hash, salt และการ verify password
 - config.test.ts — ตรวจ default configuration และ environment configuration
 - accountService.test.ts — ตรวจว่าไม่เปิดเผย passwordHash
+
+---
+
+## Lab 03 — Test Doubles
+
+**Branch:** `pornpimol/lab/03-test-doubles`
+
+### สิ่งที่ทำ
+
+1. ทดสอบ `AccountService.register` ด้วย **Stub** สำหรับ `DistrictRepository` เพื่อควบคุมว่าเขตเลือกตั้งมีอยู่หรือไม่มีอยู่ และใช้ **Dummy** `TokenService` ที่จะ error ทันทีหากถูกเรียกโดยไม่ควรถูกเรียก
+2. ใช้ **Spy** กับ `UserRepository.create` เพื่อตรวจว่าระบบส่ง `passwordHash` ไปบันทึก และไม่ส่งรหัสผ่านแบบ plain text
+3. ใช้ **Fake** `InMemoryUserRepository` เก็บข้อมูลใน array แทนฐานข้อมูล เพื่อทดสอบกรณีเลขบัตรประชาชนซ้ำ
+4. ใช้ **Mock** ตรวจว่าระบบไม่เรียก `create()` เมื่อเลขบัตรประชาชนไม่ถูกต้อง และไม่เรียก `TokenService.issue()` เมื่อเข้าสู่ระบบด้วยรหัสผ่านผิด
+5. ใช้ Fake repositories สำหรับ `DistrictRepository`, `PartyRepository` และ `CandidateRepository` เพื่อทดสอบ `ElectionAdminService.addCandidate` โดยไม่เชื่อมต่อฐานข้อมูลจริง
+6. ทดสอบกฎผู้สมัคร ได้แก่ สร้างผู้สมัครสำเร็จ, ห้ามใช้หมายเลขซ้ำในเขตเดียวกัน, ห้ามพรรคเดียวส่งผู้สมัครซ้ำในเขตเดียวกัน, อนุญาตหมายเลขซ้ำเมื่อคนละเขต และปฏิเสธพรรคที่ไม่มีอยู่
+7. ใช้ **Fake Timers** กำหนดเวลาใน test เพื่อทดสอบ JWT token ที่หมดอายุภายในทันที โดยไม่ต้องรอเวลาจริง
+
+### แนวคิดที่ได้เรียนรู้
+
+- **Dummy** คือ dependency ที่ส่งเข้ามาให้ครบ constructor แต่ test นี้ไม่ควรใช้มัน
+- **Stub** คืนค่าที่กำหนดไว้ล่วงหน้า เพื่อควบคุมข้อมูลเข้าทางอ้อมของหน่วยที่กำลังทดสอบ
+- **Spy** บันทึกข้อมูลการเรียกใช้ เพื่อตรวจสอบภายหลัง เช่น ข้อมูลที่ส่งไปยัง `create()`
+- **Mock** ตรวจสอบพฤติกรรมที่คาดหวังของการเรียก dependency เช่น ต้องไม่บันทึกข้อมูลหรือไม่ออก token
+- **Fake** เป็น implementation แบบง่ายที่ทำงานได้จริงในหน่วยความจำ จึงเหมาะเมื่อมี state หรือกฎหลายขั้นตอน
+- **Fake Timers** ทำให้ test ที่ขึ้นกับเวลา เช่น token หมดอายุ มีผลลัพธ์แน่นอน รวดเร็ว และไม่ต้องรอเวลาจริง
+
+### ผลการรัน
+
+รันคำสั่ง
+
+```bash
+npm run test:unit
