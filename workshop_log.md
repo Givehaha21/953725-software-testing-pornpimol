@@ -132,3 +132,12 @@ npm run test:unit
 - ตรวจลำดับทดสอบแบบสุ่ม: Integration ผ่าน 2 suites / 8 tests
 - สร้าง `scripts/generate-user-seed.ts` เพื่อผลิต Liquibase dev seed สำหรับ Commissioner และตรวจ apply → rollback → apply สำเร็จ
 - ผลตรวจสุดท้าย: TypeScript ผ่าน, Unit 7 suites / 31 tests, Integration 2 suites / 8 tests
+
+## Part 2 — Election App Unit Testing
+
+- ออกแบบ Unit Test สำหรับ Feature ECT-F03 การเปิด–ปิดสถานะเลือกตั้ง โดย trace ไปยัง TC-ECT-F03-07 ถึง TC-ECT-F03-16
+- เพิ่ม `ElectionStatusService` เพื่อแยกกติกาสถานะ `OPEN` และ `CLOSED` ออกจาก route และ dependency ภายนอก
+- Unit Tests ครอบคลุม Happy Path, Alternative/Failure, Stub, Spy, Jest Mock และข้อมูลที่สร้างด้วย Faker
+- ทดสอบเปิด/ปิดรายเขต, เปิด/ปิดทุกเขต, ยืนยัน/ยกเลิก และคำสั่งซ้ำแบบ idempotent
+- เก็บ branch `pornpimol/backend-original` เป็น baseline ของงาน Backend เดิม และเพิ่มเอกสารเปรียบเทียบกับ branch V&V
+- ผลตรวจสุดท้าย: TypeScript ผ่าน, Unit 8 suites / 42 tests, Integration 2 suites / 8 tests, ไม่พบ open handle
