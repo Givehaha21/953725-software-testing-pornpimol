@@ -253,5 +253,49 @@ describe('AccountService', () => {
             await expect(result).rejects.toThrow(ValidationError);
             expect(create).not.toHaveBeenCalled();
         });
+        it('rejects an unknown district', async () => {
+            // Arrange
+            const registration: Registration = {
+                nationalId: '1509900000017',
+                password: 'voter1234',
+                firstName: 'Pornpimol',
+                lastName: 'Sukjai',
+                address: 'เชียงใหม่',
+                districtId: 'UNKNOWN',
+            };
+
+            const users: UserRepository = {
+                findById: async () => null,
+                findByNationalId: async () => null,
+                create: async () => {
+                    throw new Error('create should not be called');
+                },
+                updateRole: async () => null,
+            };
+
+            const districts: DistrictRepository = {
+                findAll: async () => [],
+                // Stub: ควบคุมให้ district ที่ค้นหาไม่มีอยู่
+                findById: async () => null,
+            };
+
+            const tokens: TokenService = {
+                // Dummy: test นี้ไม่ควรใช้ token
+                issue: () => {
+                    throw new Error('dummy should not be used');
+                },
+                verify: () => {
+                    throw new Error('dummy should not be used');
+                },
+            };
+
+            const service = new AccountService(users, districts, tokens);
+
+            // Act
+            const result = service.register(registration);
+
+            // Assert
+            await expect(result).rejects.toThrow(ValidationError);
+        });
     });
 });
